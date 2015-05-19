@@ -4,6 +4,8 @@
 _author__ = 'uncle.kura@yandex.ru'
 
 import json
+import shutil
+import time
 
 from country import Country
 
@@ -24,9 +26,15 @@ class DB:
         raw_db = json.load(open(self.config[CONFIG_DB_FILENAME]))
 
         list(map(lambda x: self.add_country(x[COUNTRY_ENAME], x[COUNTRY_NAME]),
-            [x for x in raw_db[RAW_COUNTRIES] if self.find_country(x[COUNTRY_ENAME]) is None]))
+                 [x for x in raw_db[RAW_COUNTRIES] if self.find_country(x[COUNTRY_ENAME]) is None]))
+
+        self.changes = False
 
     def __del__(self):
+        if self.changes:
+            shutil.copy(self.config[CONFIG_DB_FILENAME],
+                        "OLD/" + self.config[CONFIG_DB_FILENAME] + "." + str(int(time.time())))
+
         result = {RAW_COUNTRIES: [self.to_json_country(x) for x in self.countries]}
         json.dump(result, open(self.config[CONFIG_DB_FILENAME], "wt"), sort_keys=True, indent=1, ensure_ascii=False)
 
@@ -43,6 +51,7 @@ class DB:
         return None
 
     def add_country(self, ename, name):
+        self.changes = True
         self.countries.append(Country(ename, name))
         return self.countries[-1]
 
