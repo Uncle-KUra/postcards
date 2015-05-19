@@ -44,8 +44,8 @@ class DB:
     def __enter__(self):
         return self
 
-    def find_country(self, ename):
-        result = [x for x in self.countries if x.ename == ename]
+    def find_country(self, name):
+        result = [x for x in self.countries if x.name == name]
         if len(result) == 1:
             return result[0]
         return None
