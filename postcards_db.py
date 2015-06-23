@@ -9,17 +9,20 @@ import time
 
 from country import Country
 from city import City
+from sender import Sender
 
 CONFIG_DB_FILENAME = 'db.filename'
 
 RAW_COUNTRIES = 'countries'
 RAW_CITIES = 'cities'
+RAW_SENDERS = 'senders'
 
 COUNTRY_ENAME = 'ename'
 COUNTRY_NAME = 'name'
 CITY_ENAME = 'ename'
 CITY_NAME = 'name'
 CITY_COUNTRY = 'country'
+SENDER_NAME = 'name'
 
 
 class DB:
@@ -28,6 +31,7 @@ class DB:
 
         self.countries = list()
         self.cities = list()
+        self.senders = list()
 
         raw_db = json.load(open(self.config[CONFIG_DB_FILENAME]))
 
@@ -47,6 +51,13 @@ class DB:
                         print('DBRead', 'DoubleCity', x)
                 else:
                     print('DBRead', 'NoCountry', x)
+        if RAW_SENDERS in raw_db:
+            for x in raw_db[RAW_SENDERS]:
+                sender = self.find_sender(x[SENDER_NAME])
+                if sender:
+                    print('DBRead', 'DoubleSender', x)
+                else:
+                    self.add_sender(x[SENDER_NAME])
 
         self.changes = False
 
@@ -56,7 +67,8 @@ class DB:
                         "OLD/" + self.config[CONFIG_DB_FILENAME] + "." + str(int(time.time())))
 
         result = {RAW_COUNTRIES: [self.to_json_country(x) for x in self.countries],
-                  RAW_CITIES: [self.to_json_city(x) for x in self.cities]}
+                  RAW_CITIES: [self.to_json_city(x) for x in self.cities],
+                  RAW_SENDERS: [self.to_json_sender(x) for x in self.senders]}
         json.dump(result, open(self.config[CONFIG_DB_FILENAME], "wt"), sort_keys=True, indent=1, ensure_ascii=False)
 
     def __exit__(self, exp_type, exp_value, traceback):
@@ -101,6 +113,17 @@ class DB:
         self.cities.append(city)
         return self.cities[-1]
 
+    def find_sender(self, name):
+        result = [x for x in self.senders if x.name == name]
+        if len(result) == 1:
+            return result[0]
+        return None
+
+    def add_sender(self, name):
+        self.changes = True
+        self.senders.append(Sender(name))
+        return self.senders[-1]
+
     @staticmethod
     def to_json_country(country):
         assert isinstance(country, Country)
@@ -110,3 +133,8 @@ class DB:
     def to_json_city(city):
         assert isinstance(city, City)
         return {CITY_ENAME: city.ename, CITY_NAME: city.name, CITY_COUNTRY: city.country.ename}
+
+    @staticmethod
+    def to_json_sender(sender):
+        assert isinstance(sender, Sender)
+        return {SENDER_NAME: sender.name}
