@@ -8,13 +8,18 @@ import shutil
 import time
 
 from country import Country
+from city import City
 
 CONFIG_DB_FILENAME = 'db.filename'
 
 RAW_COUNTRIES = 'countries'
+RAW_CITIES = 'cities'
 
 COUNTRY_ENAME = 'ename'
 COUNTRY_NAME = 'name'
+CITY_ENAME = 'ename'
+CITY_NAME = 'name'
+CITY_COUNTRY = 'country'
 
 
 class DB:
@@ -22,11 +27,26 @@ class DB:
         self.config = json.load(open(config_file_name))
 
         self.countries = list()
+        self.cities = list()
 
         raw_db = json.load(open(self.config[CONFIG_DB_FILENAME]))
 
-        list(map(lambda x: self.add_country(x[COUNTRY_ENAME], x[COUNTRY_NAME]),
-                 [x for x in raw_db[RAW_COUNTRIES] if self.find_country(x[COUNTRY_ENAME]) is None]))
+        if RAW_COUNTRIES in raw_db:
+            for x in raw_db[RAW_COUNTRIES]:
+                if not self.find_country(x[COUNTRY_ENAME]):
+                    self.add_country(x[COUNTRY_ENAME], x[COUNTRY_NAME])
+                else:
+                    print('DBRead', 'DoubleCountry', x)
+        if RAW_CITIES in raw_db:
+            for x in raw_db[RAW_CITIES]:
+                country = self.find_country(x[CITY_COUNTRY])
+                if country:
+                    if not self.find_city(x[CITY_ENAME]):
+                        self.add_city(x[COUNTRY_ENAME], x[COUNTRY_NAME], country)
+                    else:
+                        print('DBRead', 'DoubleCity', x)
+                else:
+                    print('DBRead', 'NoCountry', x)
 
         self.changes = False
 
@@ -35,7 +55,8 @@ class DB:
             shutil.copy(self.config[CONFIG_DB_FILENAME],
                         "OLD/" + self.config[CONFIG_DB_FILENAME] + "." + str(int(time.time())))
 
-        result = {RAW_COUNTRIES: [self.to_json_country(x) for x in self.countries]}
+        result = {RAW_COUNTRIES: [self.to_json_country(x) for x in self.countries],
+                  RAW_CITIES: [self.to_json_city(x) for x in self.cities]}
         json.dump(result, open(self.config[CONFIG_DB_FILENAME], "wt"), sort_keys=True, indent=1, ensure_ascii=False)
 
     def __exit__(self, exp_type, exp_value, traceback):
@@ -44,8 +65,26 @@ class DB:
     def __enter__(self):
         return self
 
-    def find_country(self, name):
+    def find_country_by_name(self, name):
         result = [x for x in self.countries if x.name == name]
+        if len(result) == 1:
+            return result[0]
+        return None
+
+    def find_country(self, ename):
+        result = [x for x in self.countries if x.ename == ename]
+        if len(result) == 1:
+            return result[0]
+        return None
+
+    def find_city_by_name(self, name):
+        result = [x for x in self.cities if x.name == name]
+        if len(result) > 0:
+            return result
+        return None
+
+    def find_city(self, ename):
+        result = [x for x in self.cities if x.ename == ename]
         if len(result) == 1:
             return result[0]
         return None
@@ -55,7 +94,19 @@ class DB:
         self.countries.append(Country(ename, name))
         return self.countries[-1]
 
+    def add_city(self, ename, name, country):
+        self.changes = True
+        city = City(ename, name, country)
+        country.add_city(city)
+        self.cities.append(city)
+        return self.cities[-1]
+
     @staticmethod
     def to_json_country(country):
         assert isinstance(country, Country)
         return {COUNTRY_ENAME: country.ename, COUNTRY_NAME: country.name}
+
+    @staticmethod
+    def to_json_city(city):
+        assert isinstance(city, City)
+        return {CITY_ENAME: city.ename, CITY_NAME: city.name, CITY_COUNTRY: city.country.ename}

@@ -11,7 +11,7 @@ from postcards_db import DB
 def do_import_country(file_name):
     with DB() as db:
         for new_country in json.load(open(file_name)):
-            country = db.find_country(new_country["name"])
+            country = db.find_country_by_name(new_country["name"])
             if country is not None:
                 print("Found ", country, " for ", new_country)
             else:
