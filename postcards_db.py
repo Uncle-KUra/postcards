@@ -6,16 +6,19 @@ _author__ = 'uncle.kura@yandex.ru'
 import json
 import shutil
 import time
+import datetime
 
 from country import Country
 from city import City
 from sender import Sender
+from card import Card
 
 CONFIG_DB_FILENAME = 'db.filename'
 
 RAW_COUNTRIES = 'countries'
 RAW_CITIES = 'cities'
 RAW_SENDERS = 'senders'
+RAW_CARDS = 'cards'
 
 COUNTRY_ENAME = 'ename'
 COUNTRY_NAME = 'name'
@@ -23,7 +26,12 @@ CITY_ENAME = 'ename'
 CITY_NAME = 'name'
 CITY_COUNTRY = 'country'
 SENDER_NAME = 'name'
+CARD_SENDERS = 'senders'
+CARD_CITY = 'city'
+CARD_DATES = 'dates'
+CARD_POSITION = 'position'
 
+DB_READ_ERROR = 'DBRead'
 
 class DB:
     def __init__(self, config_file_name='db.cfg'):
@@ -32,6 +40,7 @@ class DB:
         self.countries = list()
         self.cities = list()
         self.senders = list()
+        self.cards = list()
 
         raw_db = json.load(open(self.config[CONFIG_DB_FILENAME]))
 
@@ -40,7 +49,7 @@ class DB:
                 if not self.find_country(x[COUNTRY_ENAME]):
                     self.add_country(x[COUNTRY_ENAME], x[COUNTRY_NAME])
                 else:
-                    print('DBRead', 'DoubleCountry', x)
+                    print(DB_READ_ERROR, 'DoubleCountry', x)
         if RAW_CITIES in raw_db:
             for x in raw_db[RAW_CITIES]:
                 country = self.find_country(x[CITY_COUNTRY])
@@ -48,9 +57,9 @@ class DB:
                     if not self.find_city(x[CITY_ENAME]):
                         self.add_city(x[COUNTRY_ENAME], x[COUNTRY_NAME], country)
                     else:
-                        print('DBRead', 'DoubleCity', x)
+                        print(DB_READ_ERROR, 'DoubleCity', x)
                 else:
-                    print('DBRead', 'NoCountry', x)
+                    print(DB_READ_ERROR, 'NoCountry', x)
         if RAW_SENDERS in raw_db:
             for x in raw_db[RAW_SENDERS]:
                 sender = self.find_sender(x[SENDER_NAME])
@@ -58,6 +67,25 @@ class DB:
                     print('DBRead', 'DoubleSender', x)
                 else:
                     self.add_sender(x[SENDER_NAME])
+        if RAW_CARDS in raw_db:
+            for x in raw_db[RAW_CARDS]:
+                city = self.find_city(x[CARD_CITY])
+                if not city:
+                    print(DB_READ_ERROR, 'NoCity')
+                    continue
+                senders = list()
+                for sender in x[CARD_SENDERS]:
+                    sender = self.find_sender(sender)
+                    if sender:
+                        senders.append(sender)
+                    else:
+                        print(DB_READ_ERROR, 'NoSender', x)
+                        senders.clear()
+                        break
+                self.add_card(city, senders,
+                              datetime.date(**x[CARD_DATES][0]),
+                              datetime.date(**x[CARD_DATES][1]),
+                              x[CARD_POSITION])
 
         self.changes = False
 
@@ -68,7 +96,8 @@ class DB:
 
         result = {RAW_COUNTRIES: [self.to_json_country(x) for x in self.countries],
                   RAW_CITIES: [self.to_json_city(x) for x in self.cities],
-                  RAW_SENDERS: [self.to_json_sender(x) for x in self.senders]}
+                  RAW_SENDERS: [self.to_json_sender(x) for x in self.senders],
+                  RAW_CARDS: [self.to_json_card(x) for x in self.cards]}
         json.dump(result, open(self.config[CONFIG_DB_FILENAME], "wt"), sort_keys=True, indent=1, ensure_ascii=False)
 
     def __exit__(self, exp_type, exp_value, traceback):
@@ -124,6 +153,15 @@ class DB:
         self.senders.append(Sender(name))
         return self.senders[-1]
 
+    def add_card(self, city, senders, sent, received, geo):
+        self.changes = True
+        card = Card(city, senders, sent, received, geo)
+        self.cards.append(card)
+        city.add_card(city)
+        for sender in senders:
+            sender.add_card(card)
+        return card
+
     @staticmethod
     def to_json_country(country):
         assert isinstance(country, Country)
@@ -138,3 +176,11 @@ class DB:
     def to_json_sender(sender):
         assert isinstance(sender, Sender)
         return {SENDER_NAME: sender.name}
+
+    @staticmethod
+    def to_json_card(card):
+        assert isinstance(card, Card)
+        return {CARD_CITY: card.city.ename,
+                CARD_DATES: [{'year': x.year, 'month': x.month, 'day': x.day} for x in (card.start, card.finish)],
+                CARD_POSITION: card.position,
+                CARD_SENDERS: [x.name for x in card.senders]}
