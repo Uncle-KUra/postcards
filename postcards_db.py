@@ -33,6 +33,7 @@ CARD_POSITION = 'position'
 
 DB_READ_ERROR = 'DBRead'
 
+
 class DB:
     def __init__(self, config_file_name='db.cfg'):
         self.config = json.load(open(config_file_name))
@@ -161,6 +162,12 @@ class DB:
         for sender in senders:
             sender.add_card(card)
         return card
+
+    def get_cities(self):
+        return self.cities
+
+    def get_senders(self):
+        return self.senders
 
     @staticmethod
     def to_json_country(country):
