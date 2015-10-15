@@ -63,6 +63,11 @@ function cityChanged(){
     document.getElementById("cityF").value = city.value;
 }
 
+function jpegChanged(){
+    document.getElementById("jpegName").value = jpeg.value;
+}
+
+
 function dateChanged(){
 	var d = new Date(dateFrom.value);
 	var d2 = new Date(dateTo.value);
@@ -84,6 +89,7 @@ function addOnClick(){
     output['dateTo'] = document.getElementById("date1F").value;
     output['coords'] = document.getElementById("coordsF").value;
     output['senders'] = document.getElementById("sendersF").value;
+    output['jpeg'] = document.getElementById("jpegName").value;
    text = JSON.stringify(output);
    name = "postcard" + output['dateFrom'] + "--" + Math.random() + ".json";
    type = "text/plain";
@@ -148,6 +154,7 @@ window.onload = function () {
 			<br>
 			<br>
 			<br>
+            <div> jpeg <input type="file" onChange="jpegChanged();" id="jpeg" name="jpeg">
             <div> Город <select name="city" id="city" onChange="cityChanged();">
 
 '''
@@ -171,6 +178,7 @@ PART_3 = '''
         <div> Получено <input type="text" name="date1F" id="date1F"></div>
         <div> Координаты <input type="text" name="coordsF" id="coordsF"></div>
         <div> Отправители <input type="text" name="sendersF" id="sendersF"></div>
+        <div> jpeg <input type="text" name="jpegName" id="jpegName"></div>
       <div><input type="button" value="Add" onClick="addOnClick();"></div>
     </form>
 		</td>
