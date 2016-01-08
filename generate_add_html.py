@@ -172,7 +172,7 @@ PART_3 = '''
 		</td>
 		<td style="width:50%">
 
-    <form action="/add_card" method="post">
+    <form action="/add_card">
         <div> Город <input type="text" name="cityF" id="cityF"></div>
         <div> Отправлено <input type="text" name="date0F" id="date0F"></div>
         <div> Получено <input type="text" name="date1F" id="date1F"></div>

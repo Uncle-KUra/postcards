@@ -47,12 +47,14 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
                 position = [float(x) for x in params[POSITION][0].split(';')]
                 city = params[CITY][0]
                 senders = params[SENDERS][0][:-1].split(',')
-                process_added_cards.process_added_card(jpegName, start, finish, position, city, senders)
+                ret = process_added_cards.process_added_card(jpegName, start, finish, position, city, senders)
+                self.wfile.write(ret.encode())
 
 
         except Exception as ex:
             print('uups')
             print(ex)
+            print(ex.args)
 
 
 if __name__ == "__main__":

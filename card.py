@@ -3,6 +3,7 @@
 
 _author__ = 'uncle.kura@yandex.ru'
 
+import math
 
 class Card:
     def __init__(self, city, senders, sent, received, geo):
@@ -19,3 +20,12 @@ class Card:
                     'finish': self.finish,
                     'position': self.position
                     })
+
+    def weeks(self):
+        return math.ceil((self.finish - self.start).days / 7)
+
+    def distance(self):
+        return 123.4456
+
+    def rounded_distance(self):
+        return round(self.distance(), 0)
