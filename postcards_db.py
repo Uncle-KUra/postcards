@@ -26,6 +26,7 @@ CITY_ENAME = 'ename'
 CITY_NAME = 'name'
 CITY_COUNTRY = 'country'
 SENDER_NAME = 'name'
+SENDER_ENAME = 'ename'
 CARD_SENDERS = 'senders'
 CARD_CITY = 'city'
 CARD_DATES = 'dates'
@@ -67,7 +68,7 @@ class DB:
                 if sender:
                     print('DBRead', 'DoubleSender', x)
                 else:
-                    self.add_sender(x[SENDER_NAME])
+                    self.add_sender(x[SENDER_NAME], x.get(SENDER_ENAME, ''))
         if RAW_CARDS in raw_db:
             for x in raw_db[RAW_CARDS]:
                 city = self.find_city(x[CARD_CITY])
@@ -149,9 +150,9 @@ class DB:
             return result[0]
         return None
 
-    def add_sender(self, name):
+    def add_sender(self, name, ename):
         self.changes = True
-        self.senders.append(Sender(name))
+        self.senders.append(Sender(name, ename))
         return self.senders[-1]
 
     def add_card(self, city, senders, sent, received, geo):
@@ -182,7 +183,7 @@ class DB:
     @staticmethod
     def to_json_sender(sender):
         assert isinstance(sender, Sender)
-        return {SENDER_NAME: sender.name}
+        return {SENDER_NAME: sender.name, SENDER_ENAME: sender.ename}
 
     @staticmethod
     def to_json_card(card):

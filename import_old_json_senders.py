@@ -13,7 +13,7 @@ def do_import_senders(file_name):
         for card_info in json.load(open(file_name)):
             for sender in card_info['senders']:
                 if not db.find_sender(sender):
-                    db.add_sender(sender)
+                    db.add_sender(sender, '')
 
 
 if __name__ == '__main__':

@@ -202,8 +202,11 @@ def print_sender_list():
     with DB() as db:
         i = 1
         for sender in sorted(db.get_senders(), key=operator.attrgetter('name')):
+            sender_name = sender.name
+            if not sender.ename:
+                sender_name = ''
             s += '<div><input type="checkBox" id="ch' + \
-                 str(i) + '" onChange="checkChanged();"><div id="chText' + str(i) + '">' + sender.name + \
+                 str(i) + '" onChange="checkChanged();"><div id="chText' + str(i) + '">' + sender_name + \
                  '</div></input></div>'
             i += 1
     return s
