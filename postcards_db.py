@@ -22,6 +22,7 @@ RAW_CARDS = 'cards'
 
 COUNTRY_ENAME = 'ename'
 COUNTRY_NAME = 'name'
+COUNTRY_TLD = 'tld'
 CITY_ENAME = 'ename'
 CITY_NAME = 'name'
 CITY_COUNTRY = 'country'
@@ -49,7 +50,7 @@ class DB:
         if RAW_COUNTRIES in raw_db:
             for x in raw_db[RAW_COUNTRIES]:
                 if not self.find_country(x[COUNTRY_ENAME]):
-                    self.add_country(x[COUNTRY_ENAME], x[COUNTRY_NAME])
+                    self.add_country(x[COUNTRY_ENAME], x[COUNTRY_NAME], x.get(COUNTRY_TLD, ''))
                 else:
                     print(DB_READ_ERROR, 'DoubleCountry', x)
         if RAW_CITIES in raw_db:
@@ -132,9 +133,9 @@ class DB:
             return result[0]
         return None
 
-    def add_country(self, ename, name):
+    def add_country(self, ename, name, tld):
         self.changes = True
-        self.countries.append(Country(ename, name))
+        self.countries.append(Country(ename, name, tld))
         return self.countries[-1]
 
     def add_city(self, ename, name, country):
@@ -173,7 +174,7 @@ class DB:
     @staticmethod
     def to_json_country(country):
         assert isinstance(country, Country)
-        return {COUNTRY_ENAME: country.ename, COUNTRY_NAME: country.name}
+        return {COUNTRY_ENAME: country.ename, COUNTRY_NAME: country.name, COUNTRY_TLD: country.tld}
 
     @staticmethod
     def to_json_city(city):

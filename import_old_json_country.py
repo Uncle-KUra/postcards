@@ -15,7 +15,7 @@ def do_import_country(file_name):
             if country is not None:
                 print("Found ", country, " for ", new_country)
             else:
-                db.add_country(new_country["ename"], new_country["name"])
+                db.add_country(new_country["ename"], new_country["name"], '')
                 pass
 
 
