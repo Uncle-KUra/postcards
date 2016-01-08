@@ -172,14 +172,14 @@ PART_3 = '''
 		</td>
 		<td style="width:50%">
 
-    <form action="/addCard" method="post">
+    <form action="/add_card" method="post">
         <div> Город <input type="text" name="cityF" id="cityF"></div>
         <div> Отправлено <input type="text" name="date0F" id="date0F"></div>
         <div> Получено <input type="text" name="date1F" id="date1F"></div>
         <div> Координаты <input type="text" name="coordsF" id="coordsF"></div>
         <div> Отправители <input type="text" name="sendersF" id="sendersF"></div>
         <div> jpeg <input type="text" name="jpegName" id="jpegName"></div>
-      <div><input type="button" value="Add" onClick="addOnClick();"></div>
+      <div><input type="submit"></div>
     </form>
 		</td>
 	</tr>
@@ -190,28 +190,33 @@ PART_3 = '''
 
 
 def print_city_list():
+    s = ''
     with DB() as db:
         for city in sorted(db.get_cities(), key=operator.attrgetter('name')):
-            print('<option value="' + city.name + '">' + city.name + '</option>')
+            s += '<option value="' + city.name + '">' + city.name + '</option>'
+    return s
 
 
 def print_sender_list():
+    s = ''
     with DB() as db:
         i = 1
         for sender in sorted(db.get_senders(), key=operator.attrgetter('name')):
-            print('<div><input type="checkBox" id="ch' + str(i) +
-                  '" onChange="checkChanged();"><div id="chText' + str(i) + '">' + sender.name +
-                  '</div></input></div>')
+            s += '<div><input type="checkBox" id="ch' + \
+                 str(i) + '" onChange="checkChanged();"><div id="chText' + str(i) + '">' + sender.name + \
+                 '</div></input></div>'
             i += 1
+    return s
 
 
 def generate_add_html():
-    print(PART_1)
-    print_city_list()
-    print(PART_2)
-    print_sender_list()
-    print(PART_3)
+    s = PART_1
+    s += print_city_list()
+    s += PART_2
+    s += print_sender_list()
+    s += PART_3
+    return  s
 
 
 if __name__ == '__main__':
-    generate_add_html()
+    print(generate_add_html())
