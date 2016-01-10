@@ -4,6 +4,7 @@
 _author__ = 'uncle.kura@yandex.ru'
 
 import math
+import datetime
 
 DEG_2_RAD = math.pi / 180.0
 EARTH_R = 6371110
@@ -15,12 +16,16 @@ SENDER_SELF = 'Юрий Курочкин'
 
 
 class Card:
-    def __init__(self, city, senders, sent, received, geo):
+    def __init__(self, city, senders, sent, received, geo, add_time):
         self.city = city
         self.senders = senders
         self.start = sent
         self.finish = received
         self.position = geo
+        if add_time:
+            self.add_time = add_time
+        else:
+            self.add_time = datetime.datetime.now()
 
     def __str__(self):
         return str({'city': str(self.city),

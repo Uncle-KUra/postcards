@@ -32,6 +32,7 @@ CARD_SENDERS = 'senders'
 CARD_CITY = 'city'
 CARD_DATES = 'dates'
 CARD_POSITION = 'position'
+CARD_ADD_TIME = 'add_time'
 
 DB_READ_ERROR = 'DBRead'
 
@@ -85,10 +86,15 @@ class DB:
                         print(DB_READ_ERROR, 'NoSender', x)
                         senders.clear()
                         break
+                if CARD_ADD_TIME in x:
+                    add_time = datetime.date(**x[CARD_ADD_TIME])
+                else:
+                    add_time = datetime.datetime(2000, 1, 1)
                 self.add_card(city, senders,
                               datetime.date(**x[CARD_DATES][0]),
                               datetime.date(**x[CARD_DATES][1]),
-                              x[CARD_POSITION])
+                              x[CARD_POSITION],
+                              add_time)
 
         self.changes = False
 
@@ -156,9 +162,9 @@ class DB:
         self.senders.append(Sender(name, ename))
         return self.senders[-1]
 
-    def add_card(self, city, senders, sent, received, geo):
+    def add_card(self, city, senders, sent, received, geo, add_time=None):
         self.changes = True
-        card = Card(city, senders, sent, received, geo)
+        card = Card(city, senders, sent, received, geo, add_time)
         self.cards.append(card)
         city.add_card(city)
         for sender in senders:
@@ -192,4 +198,5 @@ class DB:
         return {CARD_CITY: card.city.ename,
                 CARD_DATES: [{'year': x.year, 'month': x.month, 'day': x.day} for x in (card.start, card.finish)],
                 CARD_POSITION: card.position,
-                CARD_SENDERS: [x.name for x in card.senders]}
+                CARD_SENDERS: [x.name for x in card.senders],
+                CARD_ADD_TIME: {'year': card.add_time.year, 'month': card.add_time.month, 'day': card.add_time.day}}
