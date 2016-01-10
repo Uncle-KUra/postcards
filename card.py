@@ -11,6 +11,8 @@ EARTH_R = 6371110
 HOME_LAT = 1.044593345
 HOME_LONG = 0.527932341
 
+SENDER_SELF = 'Юрий Курочкин'
+
 
 class Card:
     def __init__(self, city, senders, sent, received, geo):
@@ -26,7 +28,7 @@ class Card:
                     'start': self.start,
                     'finish': self.finish,
                     'position': self.position
-        })
+                    })
 
     def weeks(self):
         return math.ceil((self.finish - self.start).days / 7)
@@ -40,3 +42,40 @@ class Card:
     def rounded_distance(self):
         return int(round(self.distance() / 1e6, 0))
 
+    def rounded_distance_vk(self):
+        print(self.distance())
+        return str(round(self.distance() / 1e6, 1))
+
+    def days(self):
+        return (self.finish - self.start).days
+
+    def days_vk(self):
+        d = self.days()
+        dh = d % 100
+        dt = d % 10
+        if 10 <= dh <= 20:
+            return str(d) + ' дней'
+        if dt == 1:
+            return str(d) + ' день'
+        if dt in [2, 3, 4]:
+            return str(d) + ' дня'
+        return str(d) + ' дней'
+
+    def get_vk_description(self):
+        s = '<br><br>'
+        s += self.city.name + ', ' + self.city.country.name
+        s += '<br>'
+        s += self.start.date().strftime('%d.%m.%y')
+        s += '<br>'
+        s += 'Расстояние - ' + self.rounded_distance_vk() + ' Мм'
+        s += '<br>'
+        s += 'Время в пути - ' + self.days_vk()
+        s += '<br>'
+        if len(self.senders) == 1:
+            if self.senders[0].name != SENDER_SELF:
+                s += 'Отправитель - ' + self.senders[0].name
+        else:
+            s += 'Отправители - '
+            s += ', '.join([x.name for x in self.senders[:-1]])
+            s += ' и ' + self.senders[-1].name
+        return s

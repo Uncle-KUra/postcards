@@ -68,4 +68,4 @@ def process_added_card(jpeg_name, start, finish, position, city, senders):
         exif[IPTC + 'Subject'] = ', '.join(tags)
 
         exif.save_file()
-        return str(new_name)
+        return str(new_name + db_card.get_vk_description())
