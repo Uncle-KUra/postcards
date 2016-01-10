@@ -38,7 +38,13 @@ def process_added_card(jpeg_name, start, finish, position, city, senders):
         if not db_city.country.tld:
             return 'Country has no tld: ' + city
 
-        db_card = db.add_card(db_city, db_senders, start, finish, position)
+        new_name = start.date().strftime('%Y%m%d') + '-' + db_city.country.ename + '-' + db_city.ename
+        while os.path.isfile(CARDS_PATH + new_name + '.jpg'):
+            new_name += '_X'
+        new_name += '.jpg'
+        shutil.copyfile(CARDS_PATH + jpeg_name, CARDS_PATH + new_name)
+
+        db_card = db.add_card(db_city, db_senders, start, finish, position, new_name)
 
         tags = [str(start.year)]
         weeks = db_card.weeks()
@@ -50,13 +56,6 @@ def process_added_card(jpeg_name, start, finish, position, city, senders):
         for db_sender in db_senders:
             tags.append(('Sender ' + db_sender.ename).replace(' ', '_'))
         tags.append('Distance_' + str(db_card.rounded_distance()) + '_Mm')
-
-        new_name = start.date().strftime('%Y%m%d') + '-' + db_city.country.ename + '-' + db_city.ename
-        while os.path.isfile(CARDS_PATH + new_name + '.jpg'):
-            new_name += '_X'
-        new_name += '.jpg'
-
-        shutil.copyfile(CARDS_PATH + jpeg_name, CARDS_PATH + new_name)
 
         exif = GExiv2.Metadata(CARDS_PATH + new_name)
         # longitude, latitude, altitude

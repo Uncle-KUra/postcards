@@ -33,6 +33,7 @@ CARD_CITY = 'city'
 CARD_DATES = 'dates'
 CARD_POSITION = 'position'
 CARD_ADD_TIME = 'add_time'
+CARD_FILE = 'file'
 
 DB_READ_ERROR = 'DBRead'
 
@@ -94,6 +95,7 @@ class DB:
                               datetime.date(**x[CARD_DATES][0]),
                               datetime.date(**x[CARD_DATES][1]),
                               x[CARD_POSITION],
+                              x.get(CARD_FILE, ''),
                               add_time)
 
         self.changes = False
@@ -162,9 +164,9 @@ class DB:
         self.senders.append(Sender(name, ename))
         return self.senders[-1]
 
-    def add_card(self, city, senders, sent, received, geo, add_time=None):
+    def add_card(self, city, senders, sent, received, geo, file_name, add_time=None):
         self.changes = True
-        card = Card(city, senders, sent, received, geo, add_time)
+        card = Card(city, senders, sent, received, geo, file_name, add_time)
         self.cards.append(card)
         city.add_card(city)
         for sender in senders:
@@ -199,4 +201,5 @@ class DB:
                 CARD_DATES: [{'year': x.year, 'month': x.month, 'day': x.day} for x in (card.start, card.finish)],
                 CARD_POSITION: card.position,
                 CARD_SENDERS: [x.name for x in card.senders],
+                CARD_FILE: card.file_name,
                 CARD_ADD_TIME: {'year': card.add_time.year, 'month': card.add_time.month, 'day': card.add_time.day}}

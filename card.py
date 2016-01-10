@@ -16,12 +16,13 @@ SENDER_SELF = 'Юрий Курочкин'
 
 
 class Card:
-    def __init__(self, city, senders, sent, received, geo, add_time):
+    def __init__(self, city, senders, sent, received, geo, file_name, add_time):
         self.city = city
         self.senders = senders
         self.start = sent
         self.finish = received
         self.position = geo
+        self.file_name = file_name
         if add_time:
             self.add_time = add_time
         else:
@@ -32,7 +33,9 @@ class Card:
                     'senders': [str(x) for x in self.senders],
                     'start': self.start,
                     'finish': self.finish,
-                    'position': self.position
+                    'position': self.position,
+                    'file_name': self.file_name,
+                    'add_time': self.add_time
                     })
 
     def weeks(self):

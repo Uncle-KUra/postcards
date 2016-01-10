@@ -25,7 +25,7 @@ def do_import_cards(file_name):
             sent = datetime.date(card['send'][0], card['send'][1], card['send'][2])
             received = datetime.date(card['receive'][0], card['receive'][1], card['receive'][2])
             geo = card['geo']
-            db.add_card(city, senders, sent, received, geo)
+            db.add_card(city, senders, sent, received, geo, '')
 
 
 if __name__ == '__main__':
